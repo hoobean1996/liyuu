@@ -1,2 +1,5 @@
-#[derive(Debug, PartialEq, PartialOrd)]
-pub struct AstModule {}
+use super::stmt::stmt::Stmt;
+
+pub struct AstModule {
+    pub stmts: Vec<Stmt>,
+}

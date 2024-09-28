@@ -4,7 +4,11 @@ pub struct Pos {
     col: u8,
 }
 
-impl Pos {}
+impl Pos {
+    pub fn new(row: u32, col: u8) -> Pos {
+        Pos { row, col }
+    }
+}
 
 #[cfg(test)]
 mod tests {
