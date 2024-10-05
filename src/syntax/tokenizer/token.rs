@@ -1,13 +1,30 @@
 use super::attr::Attr;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     Illegal,
 
-    Int(Attr, i32),
+    // 'a'
+    Char(Attr, char),
+
+    // true, false
+    Bool(Attr, bool),
+
+    // 3
+    Int8(Attr, i8),
+    Int16(Attr, i16),
+    Int32(Attr, i32),
+    Int64(Attr, i64),
+
+    // 3.1
+    Float(Attr, f32),
+    Float64(Attr, f64),
+
+    // "abc"
     String(Attr, String),
 
-    Directive(Attr, String),
+    // a
+    ID(Attr, String),
 
     LParen(Attr),       // (
     RParen(Attr),       // )
@@ -17,10 +34,9 @@ pub enum Token {
     RBraket(Attr),      // ]
     QuestionMark(Attr), // ?
 
-    Quote(Attr),       // "
-    SingleQuote(Attr), // '
-    Dot(Attr),         // .
-    Arrow(Attr),       // ->
+    Hash(Attr),  // #
+    Dot(Attr),   // .
+    Arrow(Attr), // ->
 
     Incr(Attr),   // ++
     Plus(Attr),   // +
@@ -33,6 +49,7 @@ pub enum Token {
     LShift(Attr), // <<
     Gte(Attr),    // >=
     RShift(Attr), // >>
+    Not(Attr),    // !
 
     Typedef(Attr), // typedef
     Struct(Attr),  // struct
@@ -43,19 +60,4 @@ pub enum Token {
     Return(Attr),  // return
 
     EOF,
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::syntax::tokenizer::attr::Attr;
-
-    use super::Token;
-
-    #[test]
-    pub fn test_tokens() {
-        let token = Token::Int(Attr::new(1, 1), 3);
-        if let Token::Int(_, value) = token {
-            assert_eq!(value, 3);
-        }
-    }
 }

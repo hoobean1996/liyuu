@@ -1,5 +1,6 @@
 use super::expr::Expr;
 
-pub enum TrinaryExpr {
+#[derive(PartialEq, Debug)]
+pub enum Trinary {
     TrinaryExpr(Box<Expr>, Box<Expr>, Box<Expr>),
 }

@@ -1,7 +1,7 @@
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct Pos {
-    row: u32,
-    col: u8,
+    pub row: u32,
+    pub col: u8,
 }
 
 impl Pos {

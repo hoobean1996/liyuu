@@ -2,7 +2,7 @@ use std::fmt;
 
 use super::{operand::Operand, operator::Operator};
 
-pub enum TAC {
+pub enum Instruction {
     Assign1 {
         lhs: Operand,
         rhs: Option<Operand>,
@@ -19,10 +19,10 @@ pub enum TAC {
     },
 }
 
-impl fmt::Display for TAC {
+impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TAC::Assign1 {
+            Instruction::Assign1 {
                 lhs: lhs1,
                 rhs: lhs2,
             } => match (lhs1, lhs2) {
@@ -36,7 +36,7 @@ impl fmt::Display for TAC {
                     panic!("The TAC left-side must be Variable");
                 }
             },
-            TAC::Assign2 {
+            Instruction::Assign2 {
                 lhs,
                 rhs1,
                 op,
@@ -58,7 +58,7 @@ impl fmt::Display for TAC {
                     panic!("the TAC left-side must be Variable");
                 }
             },
-            TAC::Ifz { condition, target } => match (condition, target) {
+            Instruction::Ifz { condition, target } => match (condition, target) {
                 (Operand::Variable(cond), Operand::Label(t)) => {
                     write!(f, "Ifz {} Goto {}", &cond, t)
                 }
@@ -72,19 +72,19 @@ impl fmt::Display for TAC {
 mod tests {
     use crate::syntax::ir::tac::{operand::Operand, operator::Operator};
 
-    use super::TAC;
+    use super::Instruction;
 
     #[test]
     pub fn test_assign() {
         {
-            let tac1 = TAC::Assign1 {
+            let tac1 = Instruction::Assign1 {
                 lhs: Operand::Variable(String::from("var")),
                 rhs: Some(Operand::Constant(5)),
             };
             assert_eq!(tac1.to_string(), "var = 5");
         }
         {
-            let tac2 = TAC::Assign1 {
+            let tac2 = Instruction::Assign1 {
                 lhs: Operand::Variable(String::from("var1")),
                 rhs: Some(Operand::Variable(String::from("var2"))),
             };
@@ -92,7 +92,7 @@ mod tests {
         }
 
         {
-            let tac2 = TAC::Assign2 {
+            let tac2 = Instruction::Assign2 {
                 lhs: Operand::Variable(String::from("var1")),
                 rhs1: Operand::Variable(String::from("var2")),
                 op: Operator::Add,
@@ -102,7 +102,7 @@ mod tests {
         }
 
         {
-            let tac2 = TAC::Assign2 {
+            let tac2 = Instruction::Assign2 {
                 lhs: Operand::Variable(String::from("var1")),
                 rhs1: Operand::Variable(String::from("var2")),
                 op: Operator::Add,
@@ -111,7 +111,7 @@ mod tests {
             assert_eq!(tac2.to_string(), "var1 = var2 + 3");
         }
         {
-            let tac2 = TAC::Assign2 {
+            let tac2 = Instruction::Assign2 {
                 lhs: Operand::Variable(String::from("var1")),
                 rhs1: Operand::Constant(3),
                 op: Operator::Add,
@@ -120,7 +120,7 @@ mod tests {
             assert_eq!(tac2.to_string(), "var1 = 3 + var2");
         }
         {
-            let tac3 = TAC::Ifz {
+            let tac3 = Instruction::Ifz {
                 condition: Operand::Variable(String::from("_t0")),
                 target: Operand::Label(String::from("L1")),
             };

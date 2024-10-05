@@ -1,11 +1,11 @@
 use super::env::local::Local;
 use super::value::value::Value;
 use crate::syntax::ast::ast_module::AstModule;
-use crate::syntax::ast::expr::binary_expr::BinaryExpr;
+use crate::syntax::ast::expr::binary_expr::Binary;
 use crate::syntax::ast::expr::expr::Expr;
 use crate::syntax::ast::expr::group_expr::GroupExpr;
-use crate::syntax::ast::expr::trinary_expr::TrinaryExpr;
-use crate::syntax::ast::expr::unary_expr::UnaryExpr;
+use crate::syntax::ast::expr::trinary_expr::Trinary;
+use crate::syntax::ast::expr::unary_expr::Unary;
 use crate::syntax::ast::stmt::stmt::Stmt;
 use crate::syntax::intepreter::env::env::Env;
 
@@ -26,30 +26,31 @@ impl Intepreter {
 
     fn intepreter_stmt(&mut self, stmt: Stmt) {
         match stmt {
-            Stmt::AssignStmt(name, e) => {
-                if let Expr::IdentifierExpr(name) = *name {
+            Stmt::Assign(name, e) => {
+                if let Expr::ID(name) = *name {
                     let v = self.inteprete_expr(*e);
                     self.env.set(&name, v)
                 } else {
                     panic!("the assign left side must be a Identifier")
                 }
             }
-            Stmt::ExprStmt(e) => {}
-            Stmt::ReturnStmt(e) => {}
-            Stmt::DirectiveStmt(directive) => {}
-            Stmt::BlockStmt(stmts) => {}
-            Stmt::DeclareStmt(declare) => {}
+            Stmt::Expr(e) => {}
+            Stmt::Return(e) => {}
+            Stmt::Directive(directive) => {}
+            Stmt::Block(stmts) => {}
+            Stmt::Declare(declare) => {}
         }
     }
 
     fn inteprete_expr(&mut self, expr: Expr) -> Value {
         match expr {
-            Expr::BoolLiteralExpr(b) => Value::Bool(b),
-            Expr::IntLiteralExpr(i) => Value::Int(i),
-            Expr::StringLiteralExpr(s) => Value::String(s),
-            Expr::IdentifierExpr(name) => self.env.get(&name),
+            Expr::Bool(b) => Value::Bool(b),
+            Expr::Char(c) => Value::Int(c.to_digit(10).unwrap() as i64),
+            Expr::Int(i) => Value::Int(i),
+            Expr::String(s) => Value::String(s),
+            Expr::ID(name) => self.env.get(&name),
             Expr::UnaryExpr(ue) => match ue {
-                UnaryExpr::Minus(e) => {
+                Unary::Minus(e) => {
                     let v = self.inteprete_expr(*e);
                     if let Value::Int(pv) = v {
                         Value::Int(-pv)
@@ -57,7 +58,7 @@ impl Intepreter {
                         panic!("the value must be numberic");
                     }
                 }
-                UnaryExpr::Plus(e) => {
+                Unary::Plus(e) => {
                     let v = self.inteprete_expr(*e);
                     if let Value::Int(pv) = v {
                         Value::Int(pv)
@@ -65,9 +66,10 @@ impl Intepreter {
                         panic!("the value must be numberic");
                     }
                 }
+                _ => panic!("not supported yet"),
             },
             Expr::BinaryExpr(be) => match be {
-                BinaryExpr::Plus(e1, e2) => {
+                Binary::Plus(e1, e2) => {
                     let left = self.inteprete_expr(*e1);
                     let right = self.inteprete_expr(*e2);
                     if let (Value::Int(vleft), Value::Int(vright)) = (left, right) {
@@ -76,7 +78,7 @@ impl Intepreter {
                         panic!("the left value and right value must be numberic");
                     }
                 }
-                BinaryExpr::Div(e1, e2) => {
+                Binary::Div(e1, e2) => {
                     let left = self.inteprete_expr(*e1);
                     let right = self.inteprete_expr(*e2);
                     if let (Value::Int(vleft), Value::Int(vright)) = (left, right) {
@@ -85,7 +87,7 @@ impl Intepreter {
                         panic!("the left value and right value must be numberic");
                     }
                 }
-                BinaryExpr::Mins(e1, e2) => {
+                Binary::Minus(e1, e2) => {
                     let left = self.inteprete_expr(*e1);
                     let right = self.inteprete_expr(*e2);
                     if let (Value::Int(vleft), Value::Int(vright)) = (left, right) {
@@ -94,7 +96,7 @@ impl Intepreter {
                         panic!("the left value and right value must be numberic");
                     }
                 }
-                BinaryExpr::Mul(e1, e2) => {
+                Binary::Mul(e1, e2) => {
                     let left = self.inteprete_expr(*e1);
                     let right = self.inteprete_expr(*e2);
                     if let (Value::Int(vleft), Value::Int(vright)) = (left, right) {
@@ -103,6 +105,7 @@ impl Intepreter {
                         panic!("the left value and right value must be numberic");
                     }
                 }
+                _ => panic!("not supported yet"),
             },
             Expr::GroupExpr(ge) => match ge {
                 GroupExpr::GroupExpr(e) => {
@@ -115,7 +118,7 @@ impl Intepreter {
                 }
             },
             Expr::TrinaryExpr(te) => match te {
-                TrinaryExpr::TrinaryExpr(cond, left, right) => {
+                Trinary::TrinaryExpr(cond, left, right) => {
                     let cond = self.inteprete_expr(*cond);
                     let left = self.inteprete_expr(*left);
                     let right = self.inteprete_expr(*right);
@@ -142,8 +145,8 @@ mod tests {
         ast::{
             ast_module::AstModule,
             expr::{
-                binary_expr::BinaryExpr, expr::Expr, group_expr::GroupExpr,
-                trinary_expr::TrinaryExpr, unary_expr::UnaryExpr,
+                binary_expr::Binary, expr::Expr, group_expr::GroupExpr, trinary_expr::Trinary,
+                unary_expr::Unary,
             },
             stmt::stmt::Stmt,
         },
@@ -166,7 +169,7 @@ mod tests {
 
         {
             let expect_value = 3;
-            let e = Expr::IntLiteralExpr(expect_value);
+            let e = Expr::Int(expect_value);
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
                 assert_eq!(actual_value, expect_value);
@@ -175,8 +178,8 @@ mod tests {
 
         {
             let expect_value: i64 = -3;
-            let left = Expr::IntLiteralExpr(3);
-            let e = Expr::UnaryExpr(UnaryExpr::Minus(Box::new(left)));
+            let left = Expr::Int(3);
+            let e = Expr::UnaryExpr(Unary::Minus(Box::new(left)));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
                 assert_eq!(actual_value, expect_value);
@@ -185,9 +188,9 @@ mod tests {
 
         {
             let expect_value: i64 = 8;
-            let left = Expr::IntLiteralExpr(2);
-            let right = Expr::IntLiteralExpr(4);
-            let e = Expr::BinaryExpr(BinaryExpr::Mul(Box::new(left), Box::new(right)));
+            let left = Expr::Int(2);
+            let right = Expr::Int(4);
+            let e = Expr::BinaryExpr(Binary::Mul(Box::new(left), Box::new(right)));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
                 assert_eq!(actual_value, expect_value);
@@ -196,7 +199,7 @@ mod tests {
 
         {
             let expect_value = 3;
-            let e1 = Expr::IntLiteralExpr(expect_value);
+            let e1 = Expr::Int(expect_value);
             let e = Expr::GroupExpr(GroupExpr::GroupExpr(Box::new(e1)));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
@@ -205,10 +208,10 @@ mod tests {
         }
 
         {
-            let cond = Expr::BoolLiteralExpr(true);
-            let e1 = Expr::IntLiteralExpr(5);
-            let e2 = Expr::IntLiteralExpr(3);
-            let e = Expr::TrinaryExpr(TrinaryExpr::TrinaryExpr(
+            let cond = Expr::Bool(true);
+            let e1 = Expr::Int(5);
+            let e2 = Expr::Int(3);
+            let e = Expr::TrinaryExpr(Trinary::TrinaryExpr(
                 Box::new(cond),
                 Box::new(e1),
                 Box::new(e2),
@@ -220,10 +223,10 @@ mod tests {
         }
 
         {
-            let cond = Expr::BoolLiteralExpr(false);
-            let e1 = Expr::IntLiteralExpr(5);
-            let e2 = Expr::IntLiteralExpr(3);
-            let e = Expr::TrinaryExpr(TrinaryExpr::TrinaryExpr(
+            let cond = Expr::Bool(false);
+            let e1 = Expr::Int(5);
+            let e2 = Expr::Int(3);
+            let e = Expr::TrinaryExpr(Trinary::TrinaryExpr(
                 Box::new(cond),
                 Box::new(e1),
                 Box::new(e2),
@@ -240,9 +243,9 @@ mod tests {
         let mut intepreter = Intepreter::new();
         {
             let expect_value = 10;
-            let s = Stmt::AssignStmt(
-                Box::new(Expr::IdentifierExpr(String::from("age"))),
-                Box::new(Expr::IntLiteralExpr(expect_value)),
+            let s = Stmt::Assign(
+                Box::new(Expr::ID(String::from("age"))),
+                Box::new(Expr::Int(expect_value)),
             );
             intepreter.intepreter_stmt(s);
             if let Value::Int(actual_value) = intepreter.env.get("age") {

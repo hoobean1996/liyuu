@@ -2,7 +2,8 @@ use core::fmt;
 
 use crate::syntax::{ast::expr::expr::Expr, typing::types::Types};
 
-pub enum DeclareStmt {
+#[derive(PartialEq, Debug)]
+pub enum Declare {
     DeclareIdentifier(String, Types, Option<Expr>),
     DeclareFunction(String, Vec<Types>, Types),
     DeclareVector(String, Types, i32),
@@ -13,10 +14,10 @@ pub enum DeclareStmt {
     DeclareTypedef(String, Types),
 }
 
-impl fmt::Display for DeclareStmt {
+impl fmt::Display for Declare {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DeclareStmt::DeclareIdentifier(name, typ, expr) => {
+            Declare::DeclareIdentifier(name, typ, expr) => {
                 write!(f, "int {}", name)
             }
             _ => {
@@ -30,11 +31,11 @@ impl fmt::Display for DeclareStmt {
 mod tests {
     use crate::syntax::typing::types::Types;
 
-    use super::DeclareStmt;
+    use super::Declare;
 
     #[test]
     pub fn test_declare_identifier() {
-        let s1 = DeclareStmt::DeclareIdentifier(String::from("a"), Types::Int, None);
+        let s1 = Declare::DeclareIdentifier(String::from("a"), Types::Int, None);
         assert_eq!(s1.to_string(), "int a");
     }
 }

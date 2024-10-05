@@ -1,16 +1,16 @@
 use super::pos::Pos;
 
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct Range {
     start: Pos,
     end: Pos,
 }
 
 impl Range {
-    pub fn new(row: u32, col: u8) -> Range {
+    pub fn new() -> Range {
         Range {
-            start: Pos::new(row, col),
-            end: Pos::new(row, col),
+            start: Pos::new(0, 0),
+            end: Pos::new(0, 0),
         }
     }
 
