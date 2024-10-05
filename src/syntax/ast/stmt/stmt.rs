@@ -26,15 +26,3 @@ pub enum Stmt {
     // int a;
     Declare(Declare),
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::syntax::ast::expr::expr::Expr;
-
-    use super::Stmt;
-
-    #[test]
-    pub fn test_return() {
-        let s = Stmt::Return(Box::new(Expr::Int(3)));
-    }
-}

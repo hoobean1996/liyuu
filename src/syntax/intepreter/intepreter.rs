@@ -4,6 +4,7 @@ use crate::syntax::ast::ast_module::AstModule;
 use crate::syntax::ast::expr::binary_expr::Binary;
 use crate::syntax::ast::expr::expr::Expr;
 use crate::syntax::ast::expr::group_expr::GroupExpr;
+use crate::syntax::ast::expr::literal_expr::Literal;
 use crate::syntax::ast::expr::trinary_expr::Trinary;
 use crate::syntax::ast::expr::unary_expr::Unary;
 use crate::syntax::ast::stmt::stmt::Stmt;
@@ -27,7 +28,7 @@ impl Intepreter {
     fn intepreter_stmt(&mut self, stmt: Stmt) {
         match stmt {
             Stmt::Assign(name, e) => {
-                if let Expr::ID(name) = *name {
+                if let Expr::LiteralExpr(Literal::ID(name)) = *name {
                     let v = self.inteprete_expr(*e);
                     self.env.set(&name, v)
                 } else {
@@ -44,11 +45,11 @@ impl Intepreter {
 
     fn inteprete_expr(&mut self, expr: Expr) -> Value {
         match expr {
-            Expr::Bool(b) => Value::Bool(b),
-            Expr::Char(c) => Value::Int(c.to_digit(10).unwrap() as i64),
-            Expr::Int(i) => Value::Int(i),
-            Expr::String(s) => Value::String(s),
-            Expr::ID(name) => self.env.get(&name),
+            Expr::LiteralExpr(Literal::Bool(b)) => Value::Bool(b),
+            Expr::LiteralExpr(Literal::Char(c)) => Value::Int(c.to_digit(10).unwrap() as i64),
+            Expr::LiteralExpr(Literal::Int(i)) => Value::Int(i),
+            Expr::LiteralExpr(Literal::String(s)) => Value::String(s),
+            Expr::LiteralExpr(Literal::ID(name)) => self.env.get(&name),
             Expr::UnaryExpr(ue) => match ue {
                 Unary::Minus(e) => {
                     let v = self.inteprete_expr(*e);
@@ -145,8 +146,8 @@ mod tests {
         ast::{
             ast_module::AstModule,
             expr::{
-                binary_expr::Binary, expr::Expr, group_expr::GroupExpr, trinary_expr::Trinary,
-                unary_expr::Unary,
+                binary_expr::Binary, expr::Expr, group_expr::GroupExpr, literal_expr::Literal,
+                trinary_expr::Trinary, unary_expr::Unary,
             },
             stmt::stmt::Stmt,
         },
@@ -169,7 +170,7 @@ mod tests {
 
         {
             let expect_value = 3;
-            let e = Expr::Int(expect_value);
+            let e = Expr::LiteralExpr(Literal::Int(expect_value));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
                 assert_eq!(actual_value, expect_value);
@@ -178,7 +179,7 @@ mod tests {
 
         {
             let expect_value: i64 = -3;
-            let left = Expr::Int(3);
+            let left = Expr::LiteralExpr(Literal::Int(3));
             let e = Expr::UnaryExpr(Unary::Minus(Box::new(left)));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
@@ -188,8 +189,8 @@ mod tests {
 
         {
             let expect_value: i64 = 8;
-            let left = Expr::Int(2);
-            let right = Expr::Int(4);
+            let left = Expr::LiteralExpr(Literal::Int(2));
+            let right = Expr::LiteralExpr(Literal::Int(4));
             let e = Expr::BinaryExpr(Binary::Mul(Box::new(left), Box::new(right)));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
@@ -199,7 +200,7 @@ mod tests {
 
         {
             let expect_value = 3;
-            let e1 = Expr::Int(expect_value);
+            let e1 = Expr::LiteralExpr(Literal::Int(expect_value));
             let e = Expr::GroupExpr(GroupExpr::GroupExpr(Box::new(e1)));
             let v = intepreter.inteprete_expr(e);
             if let Value::Int(actual_value) = v {
@@ -208,9 +209,9 @@ mod tests {
         }
 
         {
-            let cond = Expr::Bool(true);
-            let e1 = Expr::Int(5);
-            let e2 = Expr::Int(3);
+            let cond = Expr::LiteralExpr(Literal::Bool(true));
+            let e1 = Expr::LiteralExpr(Literal::Int(5));
+            let e2 = Expr::LiteralExpr(Literal::Int(3));
             let e = Expr::TrinaryExpr(Trinary::TrinaryExpr(
                 Box::new(cond),
                 Box::new(e1),
@@ -223,9 +224,9 @@ mod tests {
         }
 
         {
-            let cond = Expr::Bool(false);
-            let e1 = Expr::Int(5);
-            let e2 = Expr::Int(3);
+            let cond = Expr::LiteralExpr(Literal::Bool(false));
+            let e1 = Expr::LiteralExpr(Literal::Int(5));
+            let e2 = Expr::LiteralExpr(Literal::Int(3));
             let e = Expr::TrinaryExpr(Trinary::TrinaryExpr(
                 Box::new(cond),
                 Box::new(e1),
@@ -244,8 +245,8 @@ mod tests {
         {
             let expect_value = 10;
             let s = Stmt::Assign(
-                Box::new(Expr::ID(String::from("age"))),
-                Box::new(Expr::Int(expect_value)),
+                Box::new(Expr::LiteralExpr(Literal::ID(String::from("age")))),
+                Box::new(Expr::LiteralExpr(Literal::Int(expect_value))),
             );
             intepreter.intepreter_stmt(s);
             if let Value::Int(actual_value) = intepreter.env.get("age") {

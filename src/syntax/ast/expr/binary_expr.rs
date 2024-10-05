@@ -42,4 +42,6 @@ pub enum Binary {
     Call(Box<Expr>, Vec<Expr>),
     /// foo.bar
     Member(Box<Expr>, Box<Expr>),
+    /// foo->bar
+    PtrMember(Box<Expr>, Box<Expr>),
 }
