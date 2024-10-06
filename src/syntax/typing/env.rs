@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use super::types::Types;
+use super::types::Type;
 
 pub struct TypingEnv {
-    symbols: HashMap<String, Types>,
+    symbols: HashMap<String, Type>,
 }
 
 impl TypingEnv {

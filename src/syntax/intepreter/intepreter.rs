@@ -1,6 +1,6 @@
 use super::env::local::Local;
 use super::value::value::Value;
-use crate::syntax::ast::ast_module::AstModule;
+use crate::syntax::ast::ast_module::CompilationUnit;
 use crate::syntax::ast::expr::binary_expr::Binary;
 use crate::syntax::ast::expr::expr::Expr;
 use crate::syntax::ast::expr::group_expr::GroupExpr;
@@ -21,7 +21,7 @@ impl Intepreter {
         }
     }
 
-    pub fn inteprete(&mut self, astModule: AstModule) -> Option<Value> {
+    pub fn inteprete(&mut self, astModule: CompilationUnit) -> Option<Value> {
         Some(Value::Null)
     }
 
@@ -144,7 +144,7 @@ impl Intepreter {
 mod tests {
     use crate::syntax::{
         ast::{
-            ast_module::AstModule,
+            ast_module::CompilationUnit,
             expr::{
                 binary_expr::Binary, expr::Expr, group_expr::GroupExpr, literal_expr::Literal,
                 trinary_expr::Trinary, unary_expr::Unary,
@@ -159,7 +159,7 @@ mod tests {
     #[test]
     pub fn test_intepreter() {
         let mut intepreter = Intepreter::new();
-        if let Some(value) = intepreter.inteprete(AstModule { stmts: Vec::new() }) {
+        if let Some(value) = intepreter.inteprete(CompilationUnit { stmts: Vec::new() }) {
             assert_eq!(value, Value::Null);
         }
     }

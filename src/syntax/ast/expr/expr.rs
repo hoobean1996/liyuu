@@ -8,10 +8,8 @@ use super::{
 #[derive(PartialEq, Debug)]
 pub enum Expr {
     LiteralExpr(Literal),
-
     UnaryExpr(Unary),
     BinaryExpr(Binary),
-
     TrinaryExpr(Trinary),
     GroupExpr(GroupExpr),
 }

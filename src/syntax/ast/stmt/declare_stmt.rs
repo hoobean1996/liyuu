@@ -1,17 +1,24 @@
 use core::fmt;
 
-use crate::syntax::{ast::expr::expr::Expr, typing::types::Types};
+use crate::syntax::{ast::expr::expr::Expr, typing::types::Type};
+
+use super::stmt::Stmt;
 
 #[derive(PartialEq, Debug)]
 pub enum Declare {
-    DeclareIdentifier(String, Types, Option<Expr>),
-    DeclareFunction(String, Vec<Types>, Types),
-    DeclareVector(String, Types, i32),
-    DeclarePointer(String, Types),
-    DeclareStruct(String, Vec<(String, Types)>),
-    DeclareUnion(String, Vec<(String, Types)>),
+    DeclareIdentifier(String, Type, Option<Expr>),
+    DeclareFunction {
+        name: String,
+        parameters: Vec<(String, Type)>,
+        return_type: Type,
+        body: Vec<Stmt>,
+    },
+    DeclareVector(String, Type, i32),
+    DeclarePointer(String, Type),
+    DeclareStruct(String, Vec<(String, Type)>),
+    DeclareUnion(String, Vec<(String, Type)>),
     DeclareEnum(String, Vec<(String, Option<i32>)>),
-    DeclareTypedef(String, Types),
+    DeclareTypedef(String, Type),
 }
 
 impl fmt::Display for Declare {
@@ -29,13 +36,13 @@ impl fmt::Display for Declare {
 
 #[cfg(test)]
 mod tests {
-    use crate::syntax::typing::types::Types;
+    use crate::syntax::typing::types::Type;
 
     use super::Declare;
 
     #[test]
     pub fn test_declare_identifier() {
-        let s1 = Declare::DeclareIdentifier(String::from("a"), Types::Int, None);
+        let s1 = Declare::DeclareIdentifier(String::from("a"), Type::Int, None);
         assert_eq!(s1.to_string(), "int a");
     }
 }
